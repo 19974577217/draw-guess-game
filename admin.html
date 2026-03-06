@@ -1,0 +1,680 @@
+<!-- admin.html - 管理员后台（完整最终版） -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你画我猜 · 管理后台</title>
+    <link rel="icon" href="/tzy.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a2639;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #ffffff;
+            padding: 20px;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: #1e2b3a;
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid #3f5568;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .login-container h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffd700;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: #0f1a24;
+            border: 1px solid #3f5568;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background: #4a8fcf;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            border: 1px solid #a3c9ff;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-align: center;
+            background: #2a1a1a;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .admin-panel {
+            display: none;
+        }
+
+        .header {
+            background: #1e2b3a;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #3f5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #ffd700;
+        }
+
+        .header-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: #314d6b;
+            border: 1px solid #6082a3;
+            padding: 8px 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: #4a8fcf;
+            border-color: #a3c9ff;
+        }
+
+        .logout-btn {
+            background: #5f4b3c;
+            border: 1px solid #b87c5a;
+            padding: 8px 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .refresh-btn {
+            background: #314d6b;
+            border: 1px solid #6082a3;
+            padding: 8px 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .room-card {
+            background: #1e2b3a;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #3f5568;
+        }
+
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3f5568;
+        }
+
+        .room-id {
+            background: #0f1a24;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #ffd700;
+        }
+
+        .room-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .room-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #0f1a24;
+        }
+
+        .room-status.playing {
+            background: #e67e22;
+        }
+
+        .room-word {
+            background: #0f1a24;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #ffd700;
+        }
+
+        .players-list {
+            margin: 15px 0;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: #0f1a24;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .player-item.drawer {
+            border-left: 3px solid #ffd700;
+        }
+
+        .player-device-id {
+            font-size: 0.7rem;
+            color: #9bb7d4;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ban-btn {
+            background: #5f4b3c;
+            border: 1px solid #b87c5a;
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .chat-messages {
+            background: #0f1a24;
+            border-radius: 10px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .chat-message {
+            padding: 5px;
+            border-bottom: 1px solid #3f5568;
+            font-size: 0.9rem;
+        }
+
+        .chat-message.correct {
+            color: #3fe881;
+        }
+
+        .bans-container {
+            background: #1e2b3a;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #3f5568;
+        }
+
+        .bans-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .bans-header h2 {
+            color: #ffd700;
+        }
+
+        .bans-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bans-table th {
+            text-align: left;
+            padding: 10px;
+            background: #0f1a24;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .bans-table td {
+            padding: 10px;
+            border-bottom: 1px solid #3f5568;
+        }
+
+        .unban-btn {
+            background: #5f4b3c;
+            border: 1px solid #b87c5a;
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .ban-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .ban-modal.active {
+            display: flex;
+        }
+
+        .ban-modal-content {
+            background: #1e2b3a;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            border: 2px solid #3f5568;
+        }
+
+        .ban-modal-content h2 {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+
+        .ban-modal-content p {
+            margin-bottom: 15px;
+        }
+
+        .ban-modal-content input,
+        .ban-modal-content select,
+        .ban-modal-content textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: #0f1a24;
+            border: 1px solid #3f5568;
+            border-radius: 8px;
+            color: #ffffff;
+        }
+
+        .ban-modal-content textarea {
+            height: 80px;
+            resize: none;
+        }
+
+        .ban-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .confirm-ban {
+            background: #5f4b3c;
+            color: white;
+            border: 1px solid #b87c5a;
+        }
+
+        .cancel-ban {
+            background: #314d6b;
+            color: white;
+            border: 1px solid #6082a3;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginContainer" class="login-container">
+        <h1>管理员登录</h1>
+        <div id="loginError" class="error-message"></div>
+        <input type="password" id="passwordInput" placeholder="输入密码" autofocus>
+        <button id="loginBtn">登录</button>
+    </div>
+
+    <div id="adminPanel" class="admin-panel">
+        <div class="header">
+            <h1>你画我猜 · 管理后台</h1>
+            <div class="header-tabs">
+                <button class="tab-btn active" data-tab="rooms">房间管理</button>
+                <button class="tab-btn" data-tab="bans">封禁列表</button>
+            </div>
+            <div>
+                <button class="refresh-btn" id="refreshBtn">刷新</button>
+                <button class="logout-btn" id="logoutBtn">退出登录</button>
+            </div>
+        </div>
+
+        <div id="roomsTab" class="tab-content active">
+            <div id="roomsContainer" class="rooms-grid"></div>
+        </div>
+
+        <div id="bansTab" class="tab-content">
+            <div class="bans-container">
+                <div class="bans-header">
+                    <h2>封禁设备列表</h2>
+                </div>
+                <table class="bans-table">
+                    <thead>
+                        <tr>
+                            <th>设备ID</th>
+                            <th>封禁理由</th>
+                            <th>剩余时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bansList"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="banModal" class="ban-modal">
+        <div class="ban-modal-content">
+            <h2>封禁设备</h2>
+            <p id="banPlayerInfo"></p>
+            <p class="device-id" id="banDeviceId"></p>
+            <select id="banReasonSelect">
+                <option value="恶意捣乱">恶意捣乱</option>
+                <option value="言语辱骂">言语辱骂</option>
+                <option value="刷屏">刷屏</option>
+                <option value="作弊">作弊</option>
+                <option value="其他">其他</option>
+            </select>
+            <textarea id="banReasonCustom" placeholder="自定义理由（可选）" maxlength="100"></textarea>
+            <select id="banDuration">
+                <option value="300">5分钟</option>
+                <option value="1800">30分钟</option>
+                <option value="3600">1小时</option>
+                <option value="86400">24小时</option>
+                <option value="604800">7天</option>
+                <option value="2592000">30天</option>
+                <option value="0">永久</option>
+            </select>
+            <div class="ban-modal-buttons">
+                <button class="cancel-ban" id="cancelBan">取消</button>
+                <button class="confirm-ban" id="confirmBan">确认封禁</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginContainer = document.getElementById('loginContainer');
+        const adminPanel = document.getElementById('adminPanel');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const roomsContainer = document.getElementById('roomsContainer');
+        const bansList = document.getElementById('bansList');
+        const banModal = document.getElementById('banModal');
+        const banPlayerInfo = document.getElementById('banPlayerInfo');
+        const banDeviceId = document.getElementById('banDeviceId');
+        const banReasonSelect = document.getElementById('banReasonSelect');
+        const banReasonCustom = document.getElementById('banReasonCustom');
+        const banDuration = document.getElementById('banDuration');
+        const cancelBan = document.getElementById('cancelBan');
+        const confirmBan = document.getElementById('confirmBan');
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const roomsTab = document.getElementById('roomsTab');
+        const bansTab = document.getElementById('bansTab');
+
+        let currentBanDeviceId = null;
+        let clientId = generateClientId();
+
+        function generateClientId() {
+            return 'admin_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now();
+        }
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                if (btn.dataset.tab === 'rooms') {
+                    roomsTab.classList.add('active');
+                    bansTab.classList.remove('active');
+                    loadRooms();
+                } else {
+                    roomsTab.classList.remove('active');
+                    bansTab.classList.add('active');
+                    loadBans();
+                }
+            });
+        });
+
+        loginBtn.addEventListener('click', async () => {
+            const password = passwordInput.value;
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ password, client_id: clientId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    loginContainer.style.display = 'none';
+                    adminPanel.style.display = 'block';
+                    loadRooms();
+                } else {
+                    loginError.textContent = result.message;
+                    passwordInput.value = '';
+                }
+            } catch (error) {
+                loginError.textContent = '登录失败，请重试';
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            loginContainer.style.display = 'block';
+            adminPanel.style.display = 'none';
+            passwordInput.value = '';
+            loginError.textContent = '';
+            clientId = generateClientId();
+        });
+
+        refreshBtn.addEventListener('click', () => {
+            if (roomsTab.classList.contains('active')) {
+                loadRooms();
+            } else {
+                loadBans();
+            }
+        });
+
+        async function loadRooms() {
+            try {
+                const response = await fetch('/api/admin/rooms');
+                const rooms = await response.json();
+                displayRooms(rooms);
+            } catch (error) {
+                console.error('加载房间失败:', error);
+            }
+        }
+
+        function displayRooms(rooms) {
+            roomsContainer.innerHTML = '';
+
+            if (rooms.length === 0) {
+                roomsContainer.innerHTML = '<div class="room-card">暂无活跃房间</div>';
+                return;
+            }
+
+            rooms.forEach(room => {
+                const card = document.createElement('div');
+                card.className = 'room-card';
+
+                const playersHtml = room.players.map(p => `
+                    <div class="player-item ${p.is_drawer ? 'drawer' : ''}">
+                        <div style="flex: 1;">
+                            <div>${p.name} (${p.score}分)</div>
+                            <div class="player-device-id">${p.device_id.substring(0, 8)}...</div>
+                        </div>
+                        <button class="ban-btn" onclick="openBanModal('${p.device_id}', '${p.name}')">封禁</button>
+                    </div>
+                `).join('');
+
+                const chatHtml = room.messages.map(m => `
+                    <div class="chat-message ${m.is_correct ? 'correct' : ''}">
+                        <strong>${m.user_name}:</strong> ${m.content}
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="room-header">
+                        <span class="room-id">${room.room_id}</span>
+                        <span class="room-name">${room.name}</span>
+                        <span class="room-status ${room.status}">${room.status === 'playing' ? '游戏中' : '等待中'}</span>
+                    </div>
+                    <div class="room-word">当前题目: ${room.current_word || '等待选择'}</div>
+                    <div class="players-list">${playersHtml}</div>
+                    <div class="chat-messages">${chatHtml || '<div class="chat-message">暂无聊天记录</div>'}</div>
+                `;
+
+                roomsContainer.appendChild(card);
+            });
+        }
+
+        async function loadBans() {
+            try {
+                const response = await fetch('/api/admin/banned');
+                const bans = await response.json();
+                displayBans(bans);
+            } catch (error) {
+                console.error('加载封禁列表失败:', error);
+            }
+        }
+
+        function displayBans(bans) {
+            bansList.innerHTML = '';
+
+            if (bans.length === 0) {
+                bansList.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">暂无封禁记录</td></tr>';
+                return;
+            }
+
+            bans.forEach(ban => {
+                const remaining = ban.duration === 0 ? '永久' :
+                    `${Math.floor(ban.remaining / 60)}分${ban.remaining % 60}秒`;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="device-id">${ban.device_id}</td>
+                    <td>${ban.reason}</td>
+                    <td>${remaining}</td>
+                    <td><button class="unban-btn" onclick="unbanDevice('${ban.device_id}')">解封</button></td>
+                `;
+                bansList.appendChild(row);
+            });
+        }
+
+        window.openBanModal = (deviceId, userName) => {
+            currentBanDeviceId = deviceId;
+            banPlayerInfo.textContent = `封禁玩家: ${userName}`;
+            banDeviceId.textContent = `设备ID: ${deviceId}`;
+            banReasonSelect.value = '恶意捣乱';
+            banReasonCustom.value = '';
+            banDuration.value = '300';
+            banModal.classList.add('active');
+        };
+
+        window.unbanDevice = async (deviceId) => {
+            if (!confirm(`确定要解封设备 ${deviceId} 吗？`)) return;
+
+            try {
+                const response = await fetch('/api/admin/unban', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ device_id: deviceId })
+                });
+
+                const result = await response.json();
+                if (result.success) loadBans();
+                else alert(result.message);
+            } catch (error) {
+                console.error('解封失败:', error);
+            }
+        };
+
+        cancelBan.addEventListener('click', () => {
+            banModal.classList.remove('active');
+            currentBanDeviceId = null;
+        });
+
+        confirmBan.addEventListener('click', async () => {
+            if (!currentBanDeviceId) return;
+
+            const reason = banReasonCustom.value.trim() || banReasonSelect.value;
+            const duration = parseInt(banDuration.value);
+
+            try {
+                const response = await fetch('/api/admin/ban', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        device_id: currentBanDeviceId,
+                        reason: reason,
+                        duration: duration,
+                        admin: 'admin'
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    banModal.classList.remove('active');
+                    if (bansTab.classList.contains('active')) loadBans();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('封禁失败:', error);
+            }
+        });
+
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+    </script>
+</body>
+</html>

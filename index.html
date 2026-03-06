@@ -1,0 +1,1667 @@
+<!-- index.html - 你画我猜游戏主页面（完整最终版） -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>你画我猜 · 多人游戏 • tzy制作</title>
+    <link rel="icon" href="/tzy.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/tzy.ico" type="image/x-icon">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #1a2639 0%, #2a3b4f 100%);
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 10px;
+            color: #ffffff;
+        }
+
+        h1, h2, h3, h4, h5, h6, p, span, div, label, input, button {
+            color: #ffffff;
+        }
+
+        /* 房间页面 */
+        .rooms-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .header {
+            background: #1e2b3a;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid #3f5568;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .color-indicator {
+            background: #0f1a24;
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid #3f5568;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .name-input {
+            background: #0f1a24;
+            border: 1px solid #3f5568;
+            border-radius: 30px;
+            padding: 6px 12px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
+            width: 160px;
+        }
+
+        .name-input:focus {
+            border-color: #6082a3;
+            box-shadow: 0 0 10px #6082a3;
+        }
+
+        .name-input::placeholder {
+            color: #9bb7d4;
+        }
+
+        .online-stats {
+            background: #0f1a24;
+            border-radius: 30px;
+            padding: 6px 15px;
+            border: 1px solid #3f5568;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 10px;
+            background: #3fe881;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        .admin-btn {
+            background: #4a4a4a;
+            border: 1px solid #888;
+            padding: 6px 15px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .admin-btn:hover {
+            background: #5f5f5f;
+        }
+
+        .rooms-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .rooms-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-info {
+                width: 100%;
+            }
+
+            .name-input {
+                flex: 1;
+            }
+        }
+
+        .room-list {
+            background: #1e2b3a;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid #3f5568;
+        }
+
+        .room-list h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .room-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .room-item {
+            background: #0f1a24;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #3f5568;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .room-item:hover {
+            border-color: #ffd700;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .room-info h3 {
+            color: #ffffff;
+            margin-bottom: 3px;
+            font-size: 1rem;
+        }
+
+        .room-info p {
+            color: #ffd700;
+            font-size: 0.85rem;
+        }
+
+        .room-status {
+            padding: 3px 10px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            background: #1e2b3a;
+            color: #ffffff;
+        }
+
+        .room-status.playing {
+            background: #e67e22;
+        }
+
+        .create-room-panel {
+            background: #1e2b3a;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid #3f5568;
+        }
+
+        .create-room-panel h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #ffffff;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            background: #0f1a24;
+            border: 1px solid #3f5568;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.95rem;
+        }
+
+        .form-group input[type="text"]::placeholder {
+            color: #9bb7d4;
+        }
+
+        .form-group input[type="checkbox"] {
+            margin-right: 6px;
+        }
+
+        .form-group input[type="checkbox"] + label {
+            display: inline;
+            color: #ffffff;
+        }
+
+        .join-room-panel {
+            margin-top: 15px;
+            background: #1e2b3a;
+            border-radius: 16px;
+            padding: 15px;
+            border: 1px solid #3f5568;
+        }
+
+        .join-room-panel h3 {
+            color: #ffd700;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .room-code-input {
+            display: flex;
+            gap: 8px;
+        }
+
+        .room-code-input input {
+            flex: 1;
+            padding: 8px 10px;
+            background: #0f1a24;
+            border: 1px solid #3f5568;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        button {
+            background: #314d6b;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            border: 1px solid #6082a3;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #3f5f82;
+        }
+
+        button.primary {
+            background: #4a8fcf;
+            border-color: #a3c9ff;
+        }
+
+        /* 游戏页面 */
+        .game-page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 5px;
+            display: none;
+        }
+
+        .game-header {
+            background: #1e2b3a;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #3f5568;
+        }
+
+        .room-info-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .room-code-badge {
+            background: #0f1a24;
+            padding: 4px 10px;
+            border-radius: 30px;
+            border: 1px solid #3f5568;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .game-status {
+            background: #0f1a24;
+            padding: 4px 10px;
+            border-radius: 30px;
+            border: 1px solid #3f5568;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        .exit-btn {
+            background: #5f4b3c;
+            border-color: #b87c5a;
+            padding: 5px 12px;
+            font-size: 0.9rem;
+        }
+
+        .game-main {
+            display: grid;
+            grid-template-columns: 200px 1fr 250px;
+            gap: 8px;
+        }
+
+        @media (max-width: 1024px) {
+            .game-main {
+                grid-template-columns: 180px 1fr 220px;
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-main {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .players-panel {
+                max-height: 120px;
+                overflow-y: auto;
+            }
+
+            .chat-panel {
+                height: 200px;
+            }
+
+            .canvas-panel {
+                order: -1;
+            }
+
+            canvas {
+                min-height: 250px;
+            }
+
+            .color-picker {
+                justify-content: center;
+            }
+
+            .color-option {
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-width: 1024px) {
+            .game-main {
+                grid-template-columns: 150px 1fr 200px;
+                gap: 5px;
+            }
+
+            .players-panel, .chat-panel {
+                font-size: 0.85rem;
+            }
+
+            .player-item {
+                padding: 5px;
+            }
+
+            .chat-messages {
+                height: 150px;
+            }
+
+            .color-option {
+                width: 28px;
+                height: 28px;
+            }
+
+            canvas {
+                min-height: 200px;
+            }
+        }
+
+        /* 玩家列表 */
+        .players-panel {
+            background: #1e2b3a;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #3f5568;
+            overflow-y: auto;
+        }
+
+        .players-panel h3 {
+            color: #ffd700;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .player-item {
+            background: #0f1a24;
+            border-radius: 6px;
+            padding: 6px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #3f5568;
+        }
+
+        .player-item.drawer {
+            border-color: #ffd700;
+            background: #1a2a3a;
+        }
+
+        .player-name {
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .player-score {
+            background: #1e2b3a;
+            padding: 2px 5px;
+            border-radius: 16px;
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* 画板区域 */
+        .canvas-panel {
+            background: #1e2b3a;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #3f5568;
+        }
+
+        .drawer-info {
+            margin-bottom: 8px;
+            padding: 6px;
+            background: #0f1a24;
+            border-radius: 6px;
+            color: #ffffff;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .current-word {
+            background: #0f1a24;
+            padding: 10px;
+            border-radius: 8px;
+            color: #ffd700;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #0f1a24;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+            border: 1px solid #3f5568;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a8fcf, #ffd700);
+            border-radius: 10px;
+            transition: width 1s linear;
+            width: 100%;
+        }
+
+        .round-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #9bb7d4;
+        }
+
+        .round-number {
+            background: #0f1a24;
+            padding: 2px 8px;
+            border-radius: 12px;
+            color: #ffd700;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 32px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: #ffffff;
+            box-shadow: 0 0 8px white;
+        }
+
+        .custom-color {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .custom-color input[type="color"] {
+            width: 35px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .eraser-btn.active {
+            background: #5f4b3c;
+            border-color: #b87c5a;
+            box-shadow: 0 0 10px white;
+        }
+
+        .undo-btn {
+            background: #4a4a4a;
+            border-color: #888;
+        }
+
+        .undo-btn:hover {
+            background: #5f5f5f;
+        }
+
+        .clear-board-btn {
+            background: #5f4b3c;
+            border-color: #b87c5a;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            background: #f2efe9;
+            border-radius: 8px;
+            cursor: crosshair;
+            touch-action: none;
+            aspect-ratio: 900/500;
+            max-height: 60vh;
+        }
+
+        /* 聊天区域 */
+        .chat-panel {
+            background: #1e2b3a;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #3f5568;
+            display: flex;
+            flex-direction: column;
+            height: 300px;
+        }
+
+        @media (max-width: 768px) and (orientation: landscape) {
+            .chat-panel {
+                height: 250px;
+            }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .chat-message {
+            background: #0f1a24;
+            border-radius: 6px;
+            padding: 6px;
+        }
+
+        .chat-message.system {
+            background: #1a2a3a;
+            text-align: center;
+            color: #ffd700;
+        }
+
+        .chat-message.correct {
+            background: #2a3a2a;
+            border-left: 3px solid #3fe881;
+        }
+
+        .message-sender {
+            color: #9bb7d4;
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+        }
+
+        .message-content {
+            color: #ffffff;
+            word-break: break-word;
+            font-size: 0.9rem;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 5px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 6px 8px;
+            background: #0f1a24;
+            border: 1px solid #3f5568;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+
+        .chat-input-area input::placeholder {
+            color: #9bb7d4;
+        }
+
+        /* 弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1e2b3a;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+            border: 2px solid #3f5568;
+        }
+
+        .modal-content h3 {
+            color: #ffd700;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        .modal-content p {
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .modal-buttons button {
+            min-width: 80px;
+        }
+
+        /* 游戏结束弹窗 */
+        .ranking-list {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px;
+            border-bottom: 1px solid #3f5568;
+            color: #ffffff;
+        }
+
+        .ranking-item:first-child {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* 封禁提示 */
+        .banned-modal {
+            background: #5f4b3c;
+            border-color: #b87c5a;
+        }
+
+        .timer {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* 错误消息 */
+        .error-message {
+            color: #ff6b6b;
+            background: #2a1a1a;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 房间页面 -->
+    <div id="roomsPage" class="rooms-page">
+        <div class="header">
+            <div class="user-info">
+                <div class="color-indicator">
+                    <div class="color-dot" id="myColorDot"></div>
+                    <span>我的画笔</span>
+                </div>
+                <input type="text" id="nicknameInput" class="name-input" placeholder="输入昵称" maxlength="20">
+
+            </div>
+            <div class="online-stats">
+                <span class="online-dot"></span>
+                <span id="onlineCount">0</span> 人在线
+            </div>
+        </div>
+
+        <div class="rooms-container">
+            <div class="room-list">
+                <h2>公开房间</h2>
+                <div id="roomList" class="room-items"></div>
+            </div>
+
+            <div>
+                <div class="create-room-panel">
+                    <h2>创建房间</h2>
+                    <div class="form-group">
+                        <label>房间名称</label>
+                        <input type="text" id="roomNameInput" placeholder="输入房间名称" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="hiddenRoomCheckbox"> 隐藏房间（不公开显示）
+                        </label>
+                    </div>
+                    <button id="createRoomBtn" class="primary">创建房间</button>
+                </div>
+
+                <div class="join-room-panel">
+                    <h3>加入房间</h3>
+                    <div class="room-code-input">
+                        <input type="text" id="roomCodeInput" placeholder="输入3位房间号" maxlength="3" pattern="[0-9]{3}">
+                        <button id="joinRoomBtn">加入</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏页面 -->
+    <div id="gamePage" class="game-page">
+        <div class="game-header">
+            <div class="room-info-display">
+                <div class="room-code-badge" id="roomCodeDisplay">000</div>
+                <div class="game-status" id="gameStatus">等待开始</div>
+            </div>
+            <button id="exitRoomBtn" class="exit-btn">退出房间</button>
+        </div>
+
+        <div class="game-main">
+            <!-- 玩家列表 -->
+            <div class="players-panel">
+                <h3>玩家列表</h3>
+                <div id="playersList" class="players-list"></div>
+            </div>
+
+            <!-- 画板区域 -->
+            <div class="canvas-panel">
+                <div id="drawerInfo" class="drawer-info"></div>
+
+                <div id="currentWord" class="current-word" style="display: none;"></div>
+
+                <!-- 进度条 -->
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill" style="width: 100%;"></div>
+                </div>
+                <div class="round-info" id="roundInfo" style="display: none;">
+                    <span>第 <span id="roundNumber">1</span> 回合</span>
+                    <span id="timeLeft">3:00</span>
+                </div>
+
+                <div class="toolbar">
+                    <div id="colorPicker" class="color-picker"></div>
+                </div>
+
+                <div class="custom-color">
+                    <input type="color" id="customColor" value="#000000">
+                    <button id="applyCustomColor">应用</button>
+                    <button id="eraserBtn">橡皮擦</button>
+                    <button id="undoBtn" class="undo-btn">↩ 撤销</button>
+                    <button id="clearBoardBtn" class="clear-board-btn">🗑️ 清屏</button>
+                </div>
+
+                <canvas id="boardCanvas" width="900" height="500"></canvas>
+            </div>
+
+            <!-- 聊天区域 -->
+            <div class="chat-panel">
+                <div id="chatMessages" class="chat-messages"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="输入聊天内容或猜词... (2秒限制)" maxlength="100">
+                    <button id="sendChatBtn">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认退出弹窗 -->
+    <div id="exitConfirmModal" class="modal">
+        <div class="modal-content">
+            <h3>确认退出</h3>
+            <p>确定要退出当前房间吗？</p>
+            <div class="modal-buttons">
+                <button id="confirmExit">确认</button>
+                <button id="cancelExit">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏结束弹窗 -->
+    <div id="gameEndModal" class="modal">
+        <div class="modal-content">
+            <h3 id="gameEndTitle">游戏结束</h3>
+            <p id="gameEndReason"></p>
+            <div id="rankingDisplay" class="ranking-list"></div>
+            <button id="closeGameEnd">关闭</button>
+        </div>
+    </div>
+
+    <!-- 封禁提示弹窗 -->
+    <div id="bannedModal" class="modal">
+        <div class="modal-content banned-modal">
+            <h3>账号被封禁</h3>
+            <p id="banReason"></p>
+            <p>剩余时间: <span id="banTimer" class="timer"></span>秒</p>
+        </div>
+    </div>
+
+    <!-- 发送太频繁提示弹窗 -->
+    <div id="rateLimitModal" class="modal">
+        <div class="modal-content">
+            <h3>发送太频繁</h3>
+            <p>请等待2秒后再发送消息</p>
+            <button id="closeRateLimit">确定</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
+
+            // 页面元素
+            const roomsPage = document.getElementById('roomsPage');
+            const gamePage = document.getElementById('gamePage');
+            const nicknameInput = document.getElementById('nicknameInput');
+            const onlineSpan = document.getElementById('onlineCount');
+            const myColorDot = document.getElementById('myColorDot');
+            const roomList = document.getElementById('roomList');
+            const createRoomBtn = document.getElementById('createRoomBtn');
+            const roomNameInput = document.getElementById('roomNameInput');
+            const hiddenRoomCheckbox = document.getElementById('hiddenRoomCheckbox');
+            const roomCodeInput = document.getElementById('roomCodeInput');
+            const joinRoomBtn = document.getElementById('joinRoomBtn');
+            const exitRoomBtn = document.getElementById('exitRoomBtn');
+            const adminPageBtn = document.getElementById('adminPageBtn');
+            const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+            const gameStatus = document.getElementById('gameStatus');
+            const playersList = document.getElementById('playersList');
+            const drawerInfo = document.getElementById('drawerInfo');
+            const currentWord = document.getElementById('currentWord');
+            const colorPicker = document.getElementById('colorPicker');
+            const customColor = document.getElementById('customColor');
+            const applyCustomColor = document.getElementById('applyCustomColor');
+            const eraserBtn = document.getElementById('eraserBtn');
+            const undoBtn = document.getElementById('undoBtn');
+            const clearBoardBtn = document.getElementById('clearBoardBtn');
+            const canvas = document.getElementById('boardCanvas');
+            const ctx = canvas.getContext('2d');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const sendChatBtn = document.getElementById('sendChatBtn');
+
+            // 进度条元素
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const roundInfo = document.getElementById('roundInfo');
+            const roundNumberSpan = document.getElementById('roundNumber');
+            const timeLeftSpan = document.getElementById('timeLeft');
+
+            // 弹窗
+            const exitConfirmModal = document.getElementById('exitConfirmModal');
+            const gameEndModal = document.getElementById('gameEndModal');
+            const bannedModal = document.getElementById('bannedModal');
+            const rateLimitModal = document.getElementById('rateLimitModal');
+            const confirmExit = document.getElementById('confirmExit');
+            const cancelExit = document.getElementById('cancelExit');
+            const closeGameEnd = document.getElementById('closeGameEnd');
+            const closeRateLimit = document.getElementById('closeRateLimit');
+            const gameEndTitle = document.getElementById('gameEndTitle');
+            const gameEndReason = document.getElementById('gameEndReason');
+            const rankingDisplay = document.getElementById('rankingDisplay');
+            const banReason = document.getElementById('banReason');
+            const banTimer = document.getElementById('banTimer');
+
+            // 状态变量
+            let socket = null;
+            let reconnectTimer = null;
+            let myUserId = null;
+            let myColor = '#000000';
+            let myName = '';
+            let currentRoom = null;
+            let isDrawer = false;
+            let drawing = false;
+            let lastX = 0, lastY = 0;
+            let currentPathPoints = [];
+            let allPaths = [];
+            let currentDrawColor = '#000000';
+            let isEraser = false;
+            const ERASER_COLOR = '#f2efe9';
+            const ERASER_WIDTH = 20;
+            let banTimerInterval = null;
+            let roundTimer = null;
+            let roundEndTime = 0;
+            let currentRoundNumber = 1;
+
+            // 预定义颜色
+            const DRAW_COLORS = [
+                {name: '黑色', value: '#000000'},
+                {name: '白色', value: '#FFFFFF'},
+                {name: '红色', value: '#FF0000'},
+                {name: '绿色', value: '#00FF00'},
+                {name: '蓝色', value: '#0000FF'},
+                {name: '黄色', value: '#FFFF00'},
+                {name: '紫色', value: '#800080'},
+                {name: '橙色', value: '#FFA500'},
+                {name: '粉色', value: '#FFC0CB'},
+                {name: '棕色', value: '#8B4513'},
+                {name: '青色', value: '#00FFFF'},
+                {name: '灰色', value: '#808080'}
+            ];
+
+
+
+            // 初始化颜色选择器
+            function initColorPicker() {
+                colorPicker.innerHTML = '';
+                DRAW_COLORS.forEach(color => {
+                    const colorOption = document.createElement('div');
+                    colorOption.className = 'color-option';
+                    colorOption.style.backgroundColor = color.value;
+                    colorOption.dataset.color = color.value;
+                    colorOption.addEventListener('click', () => {
+                        document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                        colorOption.classList.add('selected');
+                        currentDrawColor = color.value;
+                        isEraser = false;
+                        eraserBtn.classList.remove('active');
+                    });
+                    if (color.value === '#000000') {
+                        colorOption.classList.add('selected');
+                    }
+                    colorPicker.appendChild(colorOption);
+                });
+            }
+            initColorPicker();
+
+            // 应用自定义颜色
+            applyCustomColor.addEventListener('click', () => {
+                currentDrawColor = customColor.value;
+                isEraser = false;
+                eraserBtn.classList.remove('active');
+                document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+            });
+
+            // 橡皮擦
+            eraserBtn.addEventListener('click', () => {
+                isEraser = !isEraser;
+                eraserBtn.classList.toggle('active');
+            });
+
+            // 撤销按钮
+            undoBtn.addEventListener('click', () => {
+                if (!isDrawer) {
+                    alert('只有画手可以撤销');
+                    return;
+                }
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ type: 'undo' }));
+                }
+            });
+
+            // 清屏按钮
+            clearBoardBtn.addEventListener('click', () => {
+                if (!isDrawer) {
+                    alert('只有画手可以清空画板');
+                    return;
+                }
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ type: 'clear_board' }));
+                }
+            });
+
+            // 画板绘制函数
+            function clearCanvasBackground() {
+                ctx.fillStyle = '#f2efe9';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            clearCanvasBackground();
+
+            function redrawAllPaths() {
+                clearCanvasBackground();
+                allPaths.forEach(path => {
+                    if (path) drawPath(path);
+                });
+            }
+
+            function drawPath(path) {
+                if (!path || !path.points || path.points.length < 4) return;
+                ctx.beginPath();
+                ctx.strokeStyle = path.color || '#000000';
+                ctx.lineWidth = path.width || 4;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                const pts = path.points;
+                ctx.moveTo(pts[0], pts[1]);
+                for (let i = 2; i < pts.length; i += 2) {
+                    ctx.lineTo(pts[i], pts[i + 1]);
+                }
+                ctx.stroke();
+            }
+
+            function getCanvasCoords(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+
+                let clientX, clientY;
+                if (e.touches) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                    e.preventDefault();
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+
+                let canvasX = (clientX - rect.left) * scaleX;
+                let canvasY = (clientY - rect.top) * scaleY;
+                canvasX = Math.max(0, Math.min(canvas.width, canvasX));
+                canvasY = Math.max(0, Math.min(canvas.height, canvasY));
+                return {x: Math.round(canvasX), y: Math.round(canvasY)};
+            }
+
+            function startDrawing(e) {
+                if (!isDrawer || !currentRoom) return;
+                e.preventDefault();
+                const coord = getCanvasCoords(e);
+                lastX = coord.x;
+                lastY = coord.y;
+                drawing = true;
+
+                currentPathPoints = [lastX, lastY];
+
+                ctx.beginPath();
+                ctx.strokeStyle = isEraser ? ERASER_COLOR : currentDrawColor;
+                ctx.lineWidth = isEraser ? ERASER_WIDTH : 4;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.moveTo(lastX, lastY);
+            }
+
+            function draw(e) {
+                if (!drawing || !isDrawer) return;
+                e.preventDefault();
+                const coord = getCanvasCoords(e);
+                const x = coord.x, y = coord.y;
+
+                ctx.strokeStyle = isEraser ? ERASER_COLOR : currentDrawColor;
+                ctx.lineWidth = isEraser ? ERASER_WIDTH : 4;
+
+                ctx.lineTo(x, y);
+                ctx.stroke();
+
+                currentPathPoints.push(x, y);
+                lastX = x;
+                lastY = y;
+            }
+
+            function stopDrawing(e) {
+                if (!drawing || !isDrawer) return;
+                e.preventDefault();
+
+                if (currentPathPoints.length >= 4 && socket && socket.readyState === WebSocket.OPEN) {
+                    const pathData = {
+                        userId: myUserId,
+                        points: currentPathPoints.slice(),
+                        color: isEraser ? ERASER_COLOR : currentDrawColor,
+                        width: isEraser ? ERASER_WIDTH : 4,
+                        room_id: currentRoom
+                    };
+                    socket.send(JSON.stringify({
+                        type: 'draw',
+                        path: pathData
+                    }));
+                }
+
+                drawing = false;
+                currentPathPoints = [];
+            }
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+            canvas.addEventListener('touchstart', startDrawing, {passive: false});
+            canvas.addEventListener('touchmove', draw, {passive: false});
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
+
+            // 进度条更新函数
+            function startRoundTimer(duration, startTime) {
+                if (roundTimer) clearInterval(roundTimer);
+
+                const updateTimer = () => {
+                    const now = Date.now() / 1000;
+                    const elapsed = now - startTime;
+                    const remaining = Math.max(0, duration - elapsed);
+
+                    const minutes = Math.floor(remaining / 60);
+                    const seconds = Math.floor(remaining % 60);
+                    timeLeftSpan.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                    const percent = (remaining / duration) * 100;
+                    progressFill.style.width = `${percent}%`;
+
+                    if (remaining <= 0) {
+                        clearInterval(roundTimer);
+                    }
+                };
+
+                updateTimer();
+                roundTimer = setInterval(updateTimer, 1000);
+            }
+
+            // WebSocket连接
+            function connectWebSocket() {
+                if (reconnectTimer) clearTimeout(reconnectTimer);
+                socket = new WebSocket(WS_URL);
+
+                socket.onopen = () => {
+                    console.log('WebSocket连接成功');
+                };
+
+                socket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleServerMessage(data);
+                    } catch (err) {
+                        console.error('消息解析失败', err);
+                    }
+                };
+
+                socket.onclose = () => {
+                    console.log('连接关闭，尝试重连...');
+                    reconnectTimer = setTimeout(() => connectWebSocket(), 2000);
+                };
+
+                socket.onerror = (err) => {
+                    console.error('WebSocket错误', err);
+                    socket.close();
+                };
+            }
+
+            // 处理服务器消息
+            function handleServerMessage(data) {
+                switch (data.type) {
+                    case 'init':
+                        myUserId = data.userId;
+                        myName = data.userName;
+                        myColor = data.userColor;
+                        myColorDot.style.backgroundColor = myColor;
+                        nicknameInput.value = myName;
+                        allPaths = data.paths || [];
+                        onlineSpan.innerText = data.onlineCount;
+                        updateRoomList(data.rooms);
+                        break;
+
+                    case 'online':
+                        onlineSpan.innerText = data.count;
+                        break;
+
+                    case 'room_list':
+                        updateRoomList(data.rooms);
+                        break;
+
+                    case 'room_created':
+                    case 'room_joined':
+                        currentRoom = data.room_id;
+                        roomCodeDisplay.textContent = data.room_id;
+                        roomsPage.style.display = 'none';
+                        gamePage.style.display = 'block';
+                        if (data.players) updatePlayersList(data.players);
+                        if (data.messages) updateChatMessages(data.messages);
+
+                        if (data.current_word && data.has_word) {
+                            currentWord.style.display = 'block';
+                            currentWord.textContent = `你要画: ${data.current_word}`;
+                            currentWord.style.color = '#ffd700';
+                        } else if (data.current_drawer) {
+                            currentWord.style.display = 'block';
+                            currentWord.textContent = '画手正在画...';
+                            currentWord.style.color = '#9bb7d4';
+                        }
+
+                        // 如果游戏正在进行，显示进度条
+                        if (data.status === 'playing' && data.start_time) {
+                            progressBar.style.display = 'block';
+                            roundInfo.style.display = 'flex';
+                            currentRoundNumber = data.round_number || 1;
+                            roundNumberSpan.textContent = currentRoundNumber;
+                            startRoundTimer(data.round_time, data.start_time);
+                        }
+                        break;
+
+                    case 'player_joined':
+                        updatePlayersList(data.players);
+                        addSystemMessage(`${data.name} 加入了房间`);
+                        break;
+
+                    case 'player_left':
+                        updatePlayersList(data.players);
+                        addSystemMessage(`${data.name} 离开了房间`);
+                        break;
+
+                    case 'player_name_changed':
+                        // 更新玩家列表中的名字
+                        updatePlayersList(data.players);
+                        break;
+
+                    case 'game_started':
+                        gameStatus.textContent = '游戏中';
+                        isDrawer = (data.drawer === myUserId);
+                        drawerInfo.textContent = isDrawer ? '你是画手' : `当前画手: ${data.drawer_name}`;
+
+                        currentWord.style.display = 'block';
+                        if (isDrawer) {
+                            currentWord.textContent = `你要画: ${data.word}`;
+                            currentWord.style.color = '#ffd700';
+                        } else {
+                            currentWord.textContent = '画手正在画...';
+                            currentWord.style.color = '#9bb7d4';
+                        }
+
+                        // 显示进度条
+                        progressBar.style.display = 'block';
+                        roundInfo.style.display = 'flex';
+                        currentRoundNumber = data.round_number || 1;
+                        roundNumberSpan.textContent = currentRoundNumber;
+                        startRoundTimer(data.round_time, data.start_time);
+                        break;
+
+                    case 'new_drawer':
+                        isDrawer = (data.drawer === myUserId);
+                        drawerInfo.textContent = isDrawer ? '你是画手' : `当前画手: ${data.drawer_name}`;
+
+                        currentWord.style.display = 'block';
+                        if (isDrawer) {
+                            currentWord.textContent = `你要画: ${data.word}`;
+                            currentWord.style.color = '#ffd700';
+                        } else {
+                            currentWord.textContent = '画手正在画...';
+                            currentWord.style.color = '#9bb7d4';
+                        }
+
+                        if (data.reason) addSystemMessage(`画手更换: ${data.reason}`);
+
+                        // 更新进度条
+                        currentRoundNumber = data.round_number || currentRoundNumber + 1;
+                        roundNumberSpan.textContent = currentRoundNumber;
+                        startRoundTimer(data.round_time, data.start_time);
+                        break;
+
+                    case 'draw':
+                        allPaths.push(data.path);
+                        drawPath(data.path);
+                        break;
+
+                    case 'board_cleared':
+                        allPaths = allPaths.filter(path => path.room_id !== currentRoom);
+                        redrawAllPaths();
+                        addSystemMessage('画板已清空');
+                        break;
+
+                    case 'state':
+                        allPaths = data.paths || [];
+                        redrawAllPaths();
+                        onlineSpan.innerText = data.onlineCount;
+                        break;
+
+                    case 'chat':
+                        addChatMessage(data);
+                        break;
+
+                    case 'correct_guess':
+                        updatePlayersScores(data.scores);
+                        addSystemMessage(`${data.user_name} 猜中了！`);
+                        break;
+
+                    case 'game_ended':
+                        if (roundTimer) clearInterval(roundTimer);
+                        progressBar.style.display = 'none';
+                        roundInfo.style.display = 'none';
+                        showGameEnd(data.reason, data.ranking);
+                        break;
+
+                    case 'room_left':
+                        currentRoom = null;
+                        isDrawer = false;
+                        gamePage.style.display = 'none';
+                        roomsPage.style.display = 'block';
+                        allPaths = [];
+                        redrawAllPaths();
+                        if (roundTimer) clearInterval(roundTimer);
+                        progressBar.style.display = 'none';
+                        roundInfo.style.display = 'none';
+                        break;
+
+                    case 'banned':
+                        showBannedModal(data.reason, data.duration);
+                        break;
+
+                    case 'error':
+                        if (data.message.includes('太频繁')) {
+                            rateLimitModal.classList.add('active');
+                        } else {
+                            alert(data.message);
+                        }
+                        break;
+                }
+            }
+
+            // 关闭频率限制弹窗
+            closeRateLimit.addEventListener('click', () => {
+                rateLimitModal.classList.remove('active');
+            });
+
+            // 更新房间列表
+            function updateRoomList(rooms) {
+                roomList.innerHTML = '';
+                if (!rooms || rooms.length === 0) {
+                    roomList.innerHTML = '<div class="room-item">暂无公开房间</div>';
+                    return;
+                }
+
+                rooms.forEach(room => {
+                    const roomEl = document.createElement('div');
+                    roomEl.className = 'room-item';
+                    roomEl.innerHTML = `
+                        <div class="room-info">
+                            <h3>${room.name}</h3>
+                            <p>${room.player_count}/10 人 · ${room.status === 'playing' ? '游戏中' : '等待中'}</p>
+                        </div>
+                        <div class="room-status ${room.status}">${room.room_id}</div>
+                    `;
+                    roomEl.addEventListener('click', () => {
+                        joinRoomById(room.room_id);
+                    });
+                    roomList.appendChild(roomEl);
+                });
+            }
+
+            // 加入房间
+            function joinRoomById(roomId) {
+                if (!socket || socket.readyState !== WebSocket.OPEN) return;
+                socket.send(JSON.stringify({
+                    type: 'join_room',
+                    room_id: roomId
+                }));
+            }
+
+            // 更新玩家列表
+            function updatePlayersList(players) {
+                playersList.innerHTML = '';
+                players.forEach(player => {
+                    const playerEl = document.createElement('div');
+                    playerEl.className = `player-item ${player.user_id === currentRoom?.current_drawer ? 'drawer' : ''}`;
+                    playerEl.innerHTML = `
+                        <span class="player-name">${player.name}</span>
+                        <span class="player-score">${player.score}</span>
+                    `;
+                    playersList.appendChild(playerEl);
+                });
+            }
+
+            // 更新玩家分数
+            function updatePlayersScores(scores) {
+                scores.forEach(score => {
+                    const playerEls = document.querySelectorAll('.player-item');
+                    playerEls.forEach(el => {
+                        if (el.querySelector('.player-name').textContent === score.user_id) {
+                            el.querySelector('.player-score').textContent = score.score;
+                        }
+                    });
+                });
+            }
+
+            // 添加聊天消息
+            function addChatMessage(msg) {
+                const msgEl = document.createElement('div');
+                msgEl.className = `chat-message ${msg.is_correct ? 'correct' : ''}`;
+
+                // 处理部分猜中的消息
+                let displayContent = msg.content;
+                if (msg.match_percent && msg.match_percent > 0 && msg.match_percent < 100) {
+                    displayContent = `某某玩家猜中了！(${msg.match_percent}%)`;
+                }
+
+                msgEl.innerHTML = `
+                    <div class="message-sender">${msg.user_name}</div>
+                    <div class="message-content">${displayContent}</div>
+                `;
+                chatMessages.appendChild(msgEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // 添加系统消息
+            function addSystemMessage(content) {
+                const msgEl = document.createElement('div');
+                msgEl.className = 'chat-message system';
+                msgEl.innerHTML = `<div class="message-content">${content}</div>`;
+                chatMessages.appendChild(msgEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // 更新聊天消息列表
+            function updateChatMessages(messages) {
+                chatMessages.innerHTML = '';
+                messages.forEach(msg => addChatMessage(msg));
+            }
+
+            // 显示游戏结束弹窗
+            function showGameEnd(reason, ranking) {
+                gameEndReason.textContent = reason;
+
+                let rankingHtml = '';
+                ranking.forEach((player, index) => {
+                    rankingHtml += `
+                        <div class="ranking-item">
+                            <span>${index + 1}. ${player.name}</span>
+                            <span>${player.score}分</span>
+                        </div>
+                    `;
+                });
+                rankingDisplay.innerHTML = rankingHtml;
+
+                gameEndModal.classList.add('active');
+            }
+
+            // 显示封禁弹窗
+            function showBannedModal(reason, duration) {
+                banReason.textContent = reason;
+                bannedModal.classList.add('active');
+
+                let remaining = duration;
+                if (banTimerInterval) clearInterval(banTimerInterval);
+
+                banTimerInterval = setInterval(() => {
+                    remaining--;
+                    banTimer.textContent = remaining;
+                    if (remaining <= 0) {
+                        clearInterval(banTimerInterval);
+                        bannedModal.classList.remove('active');
+                        location.reload();
+                    }
+                }, 1000);
+            }
+
+            // 昵称修改
+            nicknameInput.addEventListener('change', () => {
+                const newName = nicknameInput.value.trim();
+                if (newName && newName !== myName && socket) {
+                    socket.send(JSON.stringify({
+                        type: 'update_name',
+                        name: newName
+                    }));
+                    myName = newName;
+                }
+            });
+
+            // 创建房间
+            createRoomBtn.addEventListener('click', () => {
+                const roomName = roomNameInput.value.trim();
+                const hidden = hiddenRoomCheckbox.checked;
+
+                socket.send(JSON.stringify({
+                    type: 'create_room',
+                    room_name: roomName,
+                    hidden: hidden
+                }));
+            });
+
+            // 加入房间
+            joinRoomBtn.addEventListener('click', () => {
+                const roomCode = roomCodeInput.value.trim();
+                if (roomCode && roomCode.length === 3) {
+                    joinRoomById(roomCode);
+                }
+            });
+
+            // 退出房间
+            exitRoomBtn.addEventListener('click', () => {
+                exitConfirmModal.classList.add('active');
+            });
+
+            confirmExit.addEventListener('click', () => {
+                if (socket && currentRoom) {
+                    socket.send(JSON.stringify({
+                        type: 'leave_room'
+                    }));
+                }
+                exitConfirmModal.classList.remove('active');
+            });
+
+            cancelExit.addEventListener('click', () => {
+                exitConfirmModal.classList.remove('active');
+            });
+
+            closeGameEnd.addEventListener('click', () => {
+                gameEndModal.classList.remove('active');
+                if (socket && currentRoom) {
+                    socket.send(JSON.stringify({
+                        type: 'leave_room'
+                    }));
+                }
+            });
+
+            // 发送聊天消息
+            sendChatBtn.addEventListener('click', sendChat);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendChat();
+            });
+
+            function sendChat() {
+                const content = chatInput.value.trim();
+                if (content && socket && currentRoom) {
+                    socket.send(JSON.stringify({
+                        type: 'chat',
+                        content: content
+                    }));
+                    chatInput.value = '';
+                }
+            }
+
+            // 启动连接
+            connectWebSocket();
+        })();
+    </script>
+</body>
+</html>
